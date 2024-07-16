@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "sen-validator"
+version = "0.1.0"
+description = "a validator for the annex a sen return"
+authors = ["William Levack Payne <108789355+WillLP-code@users.noreply.github.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+openpyxl = "^3.1.5"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
