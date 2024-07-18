@@ -7,6 +7,8 @@ import pandas as pd
 from numpy import nan
 from pandas import DataFrame
 
+import collections.abc
+
 from sen_validator.config import column_names
 from sen_validator.types import UploadedFile, UploadError
 
@@ -52,7 +54,7 @@ def read_from_text(
     This function will try to catch most basic upload errors, and dispatch other errors
     to either the csv or xml reader based on the file extension.
     """
-    logger.info(f"Reading from text. {sc.t0}")
+    logger.info(f"Reading from text.")
     metadata_extras = {}
 
     raw_files = [f for f in raw_files]
@@ -99,15 +101,15 @@ def all_cols_to_object_dtype(df) -> pd.DataFrame:
 
 
 def read_xlsx_from_text(raw_files: List[UploadedFile]) -> Dict[str, DataFrame]:
-    def _get_file_type(df) -> str:
-        for table_name, expected_columns in column_names.items():
-            if set(df.columns) == set(expected_columns):
-                logger.info(f"Loaded {table_name} from CSV. ({len(df)} rows)")
-                return table_name
-        else:
-            raise UploadError(
-                f"Failed to match provided data ({list(df.columns)}) to known column names!"
-            )
+    # def _get_file_type(df) -> str:
+    #     for table_name, expected_columns in column_names.items():
+    #         if set(df.columns) == set(expected_columns):
+    #             logger.info(f"Loaded {table_name} from xlsx. ({len(df)} rows)")
+    #             return table_name
+    #     else:
+    #         raise UploadError(
+    #             f"Failed to match provided data ({list(df.columns)}) to known column names!"
+    #         )
 
     for file_data in raw_files:
         xlsx_file = BytesIO(file_data["file_content"])

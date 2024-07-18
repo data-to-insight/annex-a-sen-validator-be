@@ -3,6 +3,8 @@ from typing import Optional
 
 import pandas as pd
 
+from sen_validator.ingress import *
+
 
 class SenValidator:
     """A class to contain the processes of SEN_Validation. Generates error reports as dataframes.
@@ -15,7 +17,7 @@ class SenValidator:
     def __init__(
         self,
         data_files,
-        ruleset_registry,
+        # ruleset_registry,
         selected_rules: Optional[list[str]] = None,
     ) -> None:
         """
@@ -33,7 +35,7 @@ class SenValidator:
         """
 
         self.data_files = data_files
-        self.ruleset_registry = ruleset_registry
+        # self.ruleset_registry = ruleset_registry
 
         # save independent version of data to be used in report.
         raw_data = copy.deepcopy(self.data_files)
