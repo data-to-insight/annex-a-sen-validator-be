@@ -59,6 +59,7 @@ def read_from_text(
 
     raw_files = [f for f in raw_files]
 
+
     extensions = list(set([f["name"].split(".")[-1].lower() for f in raw_files]))
 
     if len(raw_files) == 0:
@@ -70,8 +71,10 @@ def read_from_text(
     else:
         if extensions == ["csv"]:
             metadata_extras["file_format"] = "csv"
+            raise UploadError(f"CSVs uploaded, expected XLSX files.")
         elif extensions == ["xlsx"]:
-            metadata_extras["file_format"] == ["xlsx"]
+            metadata_extras["file_format"] = "xlsx"
+            return read_xlsx_from_text(raw_files[0]["file_content"]), metadata_extras
         else:
             raise UploadError(f"Unknown file type {extensions[0]} found.")
 
@@ -111,34 +114,34 @@ def read_xlsx_from_text(raw_files: List[UploadedFile]) -> Dict[str, DataFrame]:
     #             f"Failed to match provided data ({list(df.columns)}) to known column names!"
     #         )
 
-    for file_data in raw_files:
-        xlsx_file = BytesIO(file_data["file_content"])
-        try:
-            max_cols = max([len(cols) for cols in column_names.values()])
-            dfs = pd.read_excel(
-                xlsx_file,
-                converters={
-                    i: lambda s: str(s) if s != "" else nan for i in range(max_cols)
-                },
-                sheet_name=None,
-            )
-        except UnicodeDecodeError:
-            # raw_files is a list of files of type UploadedFile(TypedDict) whose instance is a dictionary containing the fields name, file_content, Description.
-            # TODO: attempt to identify files that couldnt be decoded at this point; continue; then raise the exception outside the for loop, naming the uploaded filenames
-            raise UploadError(
-                f"Failed to decode one or more files. Try opening the text "
-                f"file(s) in Notepad, then 'Saving As...' with the UTF-8 encoding"
-            )
-            # arrange column data types
-        for list_no, df in dfs.items():
-            logger.debug("+" * 50)
-            logger.debug("DF DATATYPES BEFORE CONVERSION", df.dtypes)
-            df = all_cols_to_object_dtype(df)
-            logger.debug("AFTER CONVERSION BEFORE CAPITALISING", df.dtypes)
-            # capitalize all string input
-            df = capitalise_object_dtype_cols(df)
-            logger.debug("DF DATATYPES AFTER CAPITALISING", df.dtypes)
 
-            dfs[list_no] = df
+    xlsx_file = BytesIO(raw_files)
+    try:
+        max_cols = max([len(cols) for cols in column_names.values()])
+        dfs = pd.read_excel(
+            xlsx_file,
+            converters={
+                i: lambda s: str(s) if s != "" else nan for i in range(max_cols)
+            },
+            sheet_name=None,
+        )
+    except UnicodeDecodeError:
+        # raw_files is a list of files of type UploadedFile(TypedDict) whose instance is a dictionary containing the fields name, file_content, Description.
+        # TODO: attempt to identify files that couldnt be decoded at this point; continue; then raise the exception outside the for loop, naming the uploaded filenames
+        raise UploadError(
+            f"Failed to decode one or more files. Try opening the text "
+            f"file(s) in Notepad, then 'Saving As...' with the UTF-8 encoding"
+        )
+        # arrange column data types
+    for list_no, df in dfs.items():
+        logger.debug("+" * 50)
+        logger.debug("DF DATATYPES BEFORE CONVERSION", df.dtypes)
+        df = all_cols_to_object_dtype(df)
+        logger.debug("AFTER CONVERSION BEFORE CAPITALISING", df.dtypes)
+        # capitalize all string input
+        df = capitalise_object_dtype_cols(df)
+        logger.debug("DF DATATYPES AFTER CAPITALISING", df.dtypes)
+
+        dfs[list_no] = df
 
     return dfs

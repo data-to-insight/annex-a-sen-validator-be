@@ -28,7 +28,7 @@ def ingress(filepath):
     frontend_files_dict = {"This year": [filepath]}
     files_list = process_uploaded_files(frontend_files_dict)
 
-    click.echo(files_list)
+    # click.echo(files_list)
 
     v = SenValidator(files_list)
 

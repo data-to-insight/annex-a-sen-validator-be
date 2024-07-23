@@ -5,6 +5,8 @@ import pandas as pd
 
 from sen_validator.ingress import *
 
+# from sen_validator.datastore import create_datastore
+
 
 class SenValidator:
     """A class to contain the processes of SEN_Validation. Generates error reports as dataframes.
@@ -39,8 +41,16 @@ class SenValidator:
 
         # save independent version of data to be used in report.
         raw_data = copy.deepcopy(self.data_files)
+        dfs, metadata_extras = read_from_text(raw_files=data_files)
 
         # TODO run
         # self.create_issue_report_df(selected_rules)
 
-    pass
+        
+    def validate(self, selected_rules: Optional[list[str]] = None):
+        logger.info("Creating Data store...")
+        
+        # data_store = create_datastore(self.dfs, self.metadata)
+
+
+
