@@ -2,7 +2,7 @@
 Column names for each SEN file.
 
 Used for:
-- Checking that the uploaded files match and identifying which CSV file is which (when CSVs are selected).
+- Checking that the uploaded files match and identifying which XLSX file is which (when XLSX are selected).
 """
 
 column_names = {

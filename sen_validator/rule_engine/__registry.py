@@ -1,41 +1,47 @@
 from dataclasses import dataclass
 from functools import wraps
-from typing import Callable, Optional
+from typing import Callable, Optional, Iterable
 
-@dataclass(frozen=True, eq=True)
-class RuleDefinition:
-    """
-    A dataclass type class used in each validation to assign information about
-    each validation rule to the rule.
+from sen_validator.rule_engine.__api import SENTable, RuleDefinition, RuleType
 
-    :param str code: The rule code for each rule.
-    :param Callable func: logic of the validation rule function.
-    :param str message: The message to be displayed if rule is flagged.
-    :param str affected_fields: The fields/columns affected by a validation rule.
 
-    :returns: RuleDefinition object containing information about validation rules.
-    :rtype: dataclass object.
-    """
+# @dataclass(frozen=True, eq=True)
+# class RuleDefinition:
+#     """
+#     A dataclass type class used in each validation to assign information about
+#     each validation rule to the rule.
 
-    code: str
-    func: Callable
-    message: Optional[str] = None
-    affected_fields: Optional[list[str]] = None
-    tables: Optional[list[str]] = (None,)
+#     :param str code: The rule code for each rule.
+#     :param Callable func: logic of the validation rule function.
+#     :param str message: The message to be displayed if rule is flagged.
+#     :param str affected_fields: The fields/columns affected by a validation rule.
+
+#     :returns: RuleDefinition object containing information about validation rules.
+#     :rtype: dataclass object.
+#     """
+
+#     code: str
+#     func: Callable
+#     message: Optional[str] = None
+#     affected_fields: Optional[list[str]] = None
+#     tables: Optional[list[str]] = (None,)
+
 
 def rule_definition(
     code: str,
+    module: SENTable,
+    rule_type: RuleType = RuleType.ERROR,
     message: Optional[str] = None,
-    affected_fields: Optional[list[str]] = None,
-    tables: Optional[list[str]] = None,
+    affected_fields: Optional[Iterable] = None,
 ):
     """
     Creates the rule definition for validation rules using RuleDefinition class as a template.
 
-    :param str code: The rule code for each rule.
-    :param str message: The message displayed for each validation rule.
+    :param int code: The rule code for each rule.
+    :param RuleType-class rule_type: object denoting if the rule is an error or a query.
+    :param CINtable-object module: string denoting the module/table affected by a validation rule.
     :param str affected_fields: The fields/columns affected by a validation rule.
-
+    :param str message: The message displayed for each validation rule.
     :returns: RuleDefinition object containing information about validation rules.
     :rtype: RuleDefiniton class object.
     """
@@ -48,13 +54,12 @@ def rule_definition(
         definition = RuleDefinition(
             code=str(code),
             func=func,
+            rule_type=rule_type,
+            module=module,
             message=message,
             affected_fields=affected_fields,
-            tables=tables,
         )
-        # when validator funcs are created, give them a unique attribute that they can be
-        # recognised by when the file is read later.
-        wrapper.rule = definition
+        wrapper.__rule_def__ = definition
         return wrapper
 
     return decorator

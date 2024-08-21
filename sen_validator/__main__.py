@@ -22,15 +22,19 @@ def cli():
     default="/workspaces/annex-a-sen-validator-be/fake_data/fake_sen.xlsx",
 )
 def ingress(filepath):
-    
+    ruleset = "sen_v0_0_1"
+
     metadata = {"collectionYear": "2022", "localAuthority": "E09000027"}
 
     frontend_files_dict = {"This year": [filepath]}
     files_list = process_uploaded_files(frontend_files_dict)
 
+    module = importlib.import_module(f"sen_validator.rules.{ruleset}")
+    ruleset_registry = getattr(module, "registry")
+
     # click.echo(files_list)
 
-    v = SenValidator(files_list)
+    v = SenValidator(files_list, ruleset_registry, metadata)
 
 
 if __name__ == "__main__":

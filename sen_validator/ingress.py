@@ -59,7 +59,6 @@ def read_from_text(
 
     raw_files = [f for f in raw_files]
 
-
     extensions = list(set([f["name"].split(".")[-1].lower() for f in raw_files]))
 
     if len(raw_files) == 0:
@@ -90,16 +89,16 @@ def read_files(files: Union[str, Path]) -> List[UploadedFile]:
 
 def capitalise_object_dtype_cols(df) -> pd.DataFrame:
     """This function takes in a pandas dataframe and capitalizes all the strings found in it."""
-    for col in df.select_dtypes(include="object"):
-        df[col] = df[col].str.upper()
+    df = df.map(lambda s: s.upper() if type(s) == str else s)
     return df
 
 
 def all_cols_to_object_dtype(df) -> pd.DataFrame:
     """This function converts all columns to object dtype."""
-    for col in df.columns:
-        if df.dtypes[col] != object:
-            df[col] = df[col].values.astype(object)
+    df = df.apply(lambda x: x.astype(object))
+    # for col in df.columns:
+    #     #if df.dtypes[col] != object:
+    #     df[col] = df[col].values.astype(object)
     return df
 
 
@@ -114,15 +113,14 @@ def read_xlsx_from_text(raw_files: List[UploadedFile]) -> Dict[str, DataFrame]:
     #             f"Failed to match provided data ({list(df.columns)}) to known column names!"
     #         )
 
-
     xlsx_file = BytesIO(raw_files)
     try:
-        max_cols = max([len(cols) for cols in column_names.values()])
+        # max_cols = max([len(cols) for cols in column_names.values()])
         dfs = pd.read_excel(
             xlsx_file,
-            converters={
-                i: lambda s: str(s) if s != "" else nan for i in range(max_cols)
-            },
+            # converters={
+            #     i: lambda s: str(s) if s != "" else nan for i in range(max_cols)
+            # },
             sheet_name=None,
         )
     except UnicodeDecodeError:
