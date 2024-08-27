@@ -32,9 +32,13 @@ def ingress(filepath):
     module = importlib.import_module(f"sen_validator.rules.{ruleset}")
     ruleset_registry = getattr(module, "registry")
 
-    # click.echo(files_list)
+    # click.echo(ruleset_registry)
 
-    v = SenValidator(files_list, ruleset_registry, metadata)
+    v = SenValidator(files_list, ruleset_registry)
+
+    full_issue_df = v.full_issue_df
+
+    click.echo(full_issue_df)
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
-from .__registry import rule_definition, YearConfig, RuleDefinition
-from .__api import SENTable
-from .__context import RuleContext
+from .__registry import rule_definition
+from .__api import SENTable, YearConfig, RuleDefinition, RuleType
+from .__context import RuleContext, IssueLocator
 
 __all__ = [
     "YearConfig",
