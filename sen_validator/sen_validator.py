@@ -7,6 +7,8 @@ from sen_validator.ingress import read_from_text
 from sen_validator.datastore import create_datastore, _process_metadata
 from sen_validator.rule_engine import SENTable, RuleDefinition, RuleContext
 
+pd.options.mode.chained_assignment = None
+
 # from sen_validator.datastore import create_datastore
 
 
@@ -166,7 +168,7 @@ def create_user_report(issue_df: pd.DataFrame, sen_data: dict):
     # Related issue locations should be displayed next to each other.
     user_report.sort_values(
         [
-            "Unique dID",
+            "Unique ID",
             "ERROR_ID",
             "tables_affected",
             "columns_affected",
@@ -225,16 +227,16 @@ class SenValidator:
             self.full_issue_df, raw_data
         )
 
-        # self.user_report = create_user_report(self.full_issue_df, raw_data)
+        self.user_report = create_user_report(self.full_issue_df, raw_data)
 
-        # # regularise full_issue_df
-        # self.full_issue_df.rename(columns={"ROW_ID": "row_id"}, inplace=True)
-        # self.full_issue_df.rename(columns={"LAchildID": "child_id"}, inplace=True)
-        # self.full_issue_df.drop(columns=["ERROR_ID"], inplace=True, errors="ignore")
-        # self.full_issue_df.drop_duplicates(
-        #     ["child_id", "rule_code", "columns_affected", "row_id"], inplace=True
-        # )
-        # self.full_issue_df.reset_index(drop=True, inplace=True)
+        # regularise full_issue_df
+        self.full_issue_df.rename(columns={"ROW_ID": "row_id"}, inplace=True)
+        self.full_issue_df.rename(columns={"Unique ID": "child_id"}, inplace=True)
+        self.full_issue_df.drop(columns=["ERROR_ID"], inplace=True, errors="ignore")
+        self.full_issue_df.drop_duplicates(
+            ["child_id", "rule_code", "columns_affected", "row_id"], inplace=True
+        )
+        self.full_issue_df.reset_index(drop=True, inplace=True)
 
         # remove header issues from main dataframe and transfer to no-child-id dataframe
         # header_issues = self.full_issue_df[
