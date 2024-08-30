@@ -8,16 +8,17 @@ from sen_validator.rule_engine import (
     RuleContext,
     rule_definition,
 )
-from sen_validator.test_engine import run_rule
 
 list_1 = SENTable.List_1
 
+from sen_validator.test_engine import run_rule
+
 
 @rule_definition(
-    code="106b",
+    code="107",
     module=SENTable.List_1,
-    message="Initial EHCP date is after Date EHC plan last reviewed",
-    affected_fields=["Date initial EHC plan issued", "Date EHC plan last reviewed"],
+    message="Child aged 6+ without either a) UPN, b) ULN",
+    affected_fields=["Date of birth", "UPN", "ULN"],
 )
 def validate(
     data_container: Mapping[SENTable, pd.DataFrame], rule_context: RuleContext
@@ -25,21 +26,23 @@ def validate(
     df = data_container[list_1]
     df.index.name = "ROW_ID"
 
-    df["Date initial EHC plan issued"] = pd.to_datetime(
-        df["Date initial EHC plan issued"], dayfirst=True, errors="coerce"
-    )
-    df["Date EHC plan last reviewed"] = pd.to_datetime(
-        df["Date EHC plan last reviewed"], dayfirst=True, errors="coerce"
+    df["Date of birth"] = pd.to_datetime(
+        df["Date of birth"], dayfirst=True, errors="coerce"
     )
 
-    df = df[df["Date initial EHC plan issued"] > df["Date EHC plan last reviewed"]]
-    df_issues = df.reset_index()
+    over_6 = df["Date of birth"] + pd.DateOffset(years=6) < pd.to_datetime("today")
 
+    no_upn_uln = df["UPN"].isna() & df["ULN"].isna()
+
+    df_issues = df[over_6 & no_upn_uln]
+
+    df_issues = df_issues.reset_index()
+    
     link_id = tuple(
         zip(
             df_issues["Unique ID"],
-            df_issues["Date initial EHC plan issued"],
-            df_issues["Date EHC plan last reviewed"],
+            df_issues["UPN"],
+            df_issues["ULN"],
         )
     )
     df_issues["ERROR_ID"] = link_id
@@ -52,9 +55,10 @@ def validate(
 
     rule_context.push_type_1(
         table=list_1,
-        columns=["Date initial EHC plan issued", "Date EHC plan last reviewed"],
+        columns=["UPN", "ULN"],
         row_df=df_issues,
     )
+
 
 
 def test_validate():
@@ -62,28 +66,39 @@ def test_validate():
         [
             {
                 "Unique ID": 1,
-                "Date initial EHC plan issued": "01/01/2000",
-                "Date EHC plan last reviewed": "02/01/2000",
+                "Date of birth":"27/08/2025",
+                "UPN": "2",
+                "ULN": pd.NA,
             },
             {
                 "Unique ID": 1,
-                "Date initial EHC plan issued": "01/01/2030",
-                "Date EHC plan last reviewed": "02/01/2030",
+                "Date of birth":"27/08/2000",
+                "UPN": pd.NA,
+                "ULN": "1",
             },
             {
                 "Unique ID": 2,
-                "Date initial EHC plan issued": "01/01/2030",
-                "Date EHC plan last reviewed": "02/01/2030",
+                "Date of birth":"27/08/2000",
+                "UPN": "2",
+                "ULN": pd.NA,
             },
             {
                 "Unique ID": 3,
-                "Date initial EHC plan issued": "01/01/2000",
-                "Date EHC plan last reviewed": "29/12/1999",
+                "Date of birth":"27/08/2000",
+                "UPN": pd.NA,
+                "ULN":pd.NA,
+            },
+            {
+                "Unique ID": 6,
+                "Date of birth":"27/08/2025",
+                "UPN": pd.NA,
+                "ULN":pd.NA,
             },
             {
                 "Unique ID": 4,
-                "Date initial EHC plan issued": "01/01/1999",
-                "Date EHC plan last reviewed": "02/01/2000",
+                "Date of birth":"27/08/2015",
+                "UPN": "2",
+                "ULN": "1",
             },
         ]
     )
@@ -97,8 +112,8 @@ def test_validate():
 
     issue_columns = issues.columns
     assert issue_columns == [
-        "Date initial EHC plan issued",
-        "Date EHC plan last reviewed",
+        "UPN",
+        "ULN",
     ]
 
     issue_rows = issues.row_df
@@ -113,8 +128,8 @@ def test_validate():
             {
                 "ERROR_ID": (
                     3,
-                    pd.to_datetime("01/01/2000", dayfirst=True, errors="coerce"),
-                    pd.to_datetime("29/12/1999", dayfirst=True, errors="coerce"),
+                    pd.NA,
+                    pd.NA,
                 ),
                 "ROW_ID": [3],
             }
@@ -123,8 +138,9 @@ def test_validate():
 
     assert issue_rows.equals(expected_df)
 
-    assert result.definition.code == "106b"
+    assert result.definition.code == "107"
     assert (
         result.definition.message
-        == "Initial EHCP date is after Date EHC plan last reviewed"
+        == "Child aged 6+ without either a) UPN, b) ULN"
     )
+

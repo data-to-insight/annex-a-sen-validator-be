@@ -31,7 +31,7 @@ def validate(
 
 
 def test_validate():
-    child_identifiers = pd.DataFrame(
+    fake_list = pd.DataFrame(
         {
             "Date of birth": [
                 # These should pass
@@ -48,7 +48,7 @@ def test_validate():
         }
     )
 
-    result = run_rule(validate, {list_1: child_identifiers})
+    result = run_rule(validate, {list_1: fake_list})
 
     issues = list(result.issues)
 
