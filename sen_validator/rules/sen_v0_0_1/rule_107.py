@@ -37,7 +37,7 @@ def validate(
     df_issues = df[over_6 & no_upn_uln]
 
     df_issues = df_issues.reset_index()
-    
+
     link_id = tuple(
         zip(
             df_issues["Unique ID"],
@@ -51,7 +51,6 @@ def validate(
         .apply(list)
         .reset_index()
     )
-    
 
     rule_context.push_type_1(
         table=list_1,
@@ -60,43 +59,42 @@ def validate(
     )
 
 
-
 def test_validate():
     fake_list = pd.DataFrame(
         [
             {
                 "Unique ID": 1,
-                "Date of birth":"27/08/2025",
+                "Date of birth": "27/08/2025",
                 "UPN": "2",
                 "ULN": pd.NA,
             },
             {
                 "Unique ID": 1,
-                "Date of birth":"27/08/2000",
+                "Date of birth": "27/08/2000",
                 "UPN": pd.NA,
                 "ULN": "1",
             },
             {
                 "Unique ID": 2,
-                "Date of birth":"27/08/2000",
+                "Date of birth": "27/08/2000",
                 "UPN": "2",
                 "ULN": pd.NA,
             },
             {
                 "Unique ID": 3,
-                "Date of birth":"27/08/2000",
+                "Date of birth": "27/08/2000",
                 "UPN": pd.NA,
-                "ULN":pd.NA,
+                "ULN": pd.NA,
             },
             {
                 "Unique ID": 6,
-                "Date of birth":"27/08/2025",
+                "Date of birth": "27/08/2025",
                 "UPN": pd.NA,
-                "ULN":pd.NA,
+                "ULN": pd.NA,
             },
             {
                 "Unique ID": 4,
-                "Date of birth":"27/08/2015",
+                "Date of birth": "27/08/2015",
                 "UPN": "2",
                 "ULN": "1",
             },
@@ -139,8 +137,4 @@ def test_validate():
     assert issue_rows.equals(expected_df)
 
     assert result.definition.code == "107"
-    assert (
-        result.definition.message
-        == "Child aged 6+ without either a) UPN, b) ULN"
-    )
-
+    assert result.definition.message == "Child aged 6+ without either a) UPN, b) ULN"

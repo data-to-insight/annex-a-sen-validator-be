@@ -48,7 +48,6 @@ def validate(
         .apply(list)
         .reset_index()
     )
-    
 
     rule_context.push_type_1(
         table=list_1,
