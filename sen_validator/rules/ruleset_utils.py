@@ -66,7 +66,7 @@ def get_year_ruleset(validator_version: str) -> dict[str, RuleDefinition]:
     """
     Gets the registry of validation rules for the year specified in the metadata.
     """
-    # for example, convert "2023" to "lac2022_23"
+    # for example, convert "0_0_1" to "sen_v0_0_1"
     ruleset = f"sen_v{validator_version}"
 
     module = importlib.import_module(f"sen_validator.rules.{ruleset}")
