@@ -14,8 +14,8 @@ pd.options.mode.chained_assignment = None
 
 def enum_keys(dict_input: dict):
     """
-    Convert keys of a dictionary to its corresponding CINTable format.
-    :param dict dict_input: dictionary of dataframes of CIN data
+    Convert keys of a dictionary to its corresponding SENTable format.
+    :param dict dict_input: dictionary of dataframes of SEN data
     :return dict enumed_dict: same data content with keys replaced.
     """
     enumed_dict = {}
@@ -28,7 +28,7 @@ def enum_keys(dict_input: dict):
 def include_issue_child(issue_df: pd.DataFrame, sen_data: dict):
     """
     :param DataFrame issue_df: complete data about all issue locations.
-    :param dict cin_data: dictionary of dataframes generated when cin xml is converted to tabular format.
+    :param dict sen_data: dictionary of dataframes generated when sen xml is converted to tabular format.
     """
 
     try:
@@ -83,7 +83,7 @@ def create_user_report(issue_df: pd.DataFrame, sen_data: dict):
     and rule code-description combinations to answer the latter.
 
     :param pd.DataFrame issue_df: in which child IDs have been added.
-    :param dict cin_data: dataframes of user's input data.
+    :param dict sen_data: dataframes of user's input data.
     :return user_report: dataframe containing issue locations and specific values that fail in those locations.
 
     """
@@ -153,6 +153,12 @@ def create_user_report(issue_df: pd.DataFrame, sen_data: dict):
     ]
 
     def datetime_to_str(element):
+        """
+        Converts datetimes to strings to be used in the final user report.
+
+        :param element: DateTime elements from user report tables.
+        :returns: individual DateTime elements as strings for output report.
+        """
         if isinstance(element, pd.Timestamp):
             # convert datetime elements to str date values
             return str(element.strftime("%Y-%m-%d"))
@@ -185,7 +191,7 @@ def create_user_report(issue_df: pd.DataFrame, sen_data: dict):
 
 
 class SenValidator:
-    """A class to contain the processes of SEN_Validation. Generates error reports as dataframes.
+    """A class to contain the processes of SEN validation. Generates error reports as dataframes.
 
     :param any data_files: Data files for validation, either a DataContainerWrapper object, or a
         dictionary of DataFrames.
@@ -238,17 +244,6 @@ class SenValidator:
         )
         self.full_issue_df.reset_index(drop=True, inplace=True)
 
-        # remove header issues from main dataframe and transfer to no-child-id dataframe
-        # header_issues = self.full_issue_df[
-        #     self.full_issue_df["tables_affected"] == "Header"
-        # ]
-        # self.full_issue_df = self.full_issue_df[
-        #     self.full_issue_df["tables_affected"] != "Header"
-        # ]
-        # # combine multichild issues
-        # self.multichild_issues = pd.concat([header_issues, self.la_rule_issues])[
-        #     ["rule_code", "rule_description"]
-        # ]
 
     def get_rules_to_run(
         self, registry, selected_rules: Optional[list[str]] = None
@@ -326,6 +321,28 @@ class SenValidator:
             self.rule_messages.append(f"{str(rule.code)} - {rule.message}")
 
     def create_issue_report_df(self, selected_rules: Optional[list[str]] = None):
+        """
+        Creates report of errors found when validating SEN data input to
+        the tool.
+
+        This function takes the errors/rule violations reported by individual validation rule functions,
+        including table, field, and index locations of errors. It is important that it uses deepcopy
+        on the data per rule as some rules alter original data when only a standard .copy() function
+        is used. It runs through every rule in the registry and:
+
+        >Creates lists of rules passed, broken, and relevant messages.
+        >Returns a dataframe of issue instances for broken validation rules.
+        >Returns a dictionary of all rules codes and relevant messages.
+
+        :param DataFrame issue_instances: issues found in validation.
+        :param DataFrame all_rules_issue_locs: issue locations
+        :param list rules_broken: An empty list which is populated with the codes of the rules that trigger issues in the data during validation.
+        :param list la_rules_broken: An empty list which is populated with the list of LA rules that fail validation.
+        :param list rules_passed: An empty list of rules passed, populated with rules with no validation errors.
+        :returns: DataFrame of instances and locations of validation rule violations from data input via FE or CLI.
+        :rtype: DataFrame
+        :raises: Errors with rules that raise errors when validating data.
+        """
         enum_data_files = enum_keys(self.dfs)
         self.issue_instances = pd.DataFrame()
         self.full_issue_df = pd.DataFrame(

@@ -12,7 +12,7 @@ class IssueLocator:
     """
     Dataclass used to specify definite locations of issues that should be highlighted in the user's data.
 
-    :param CINTable-object table: Contains the name of the module/table in erorr for
+    :param SENTable-object table: Contains the name of the module/table in erorr for
         a validation rule.
     :param str field: The name of the field/column of an error in validation.
     :param int row: The index/row number of an error.

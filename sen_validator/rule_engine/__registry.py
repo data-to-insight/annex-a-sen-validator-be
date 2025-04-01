@@ -5,26 +5,6 @@ from typing import Callable, Optional, Iterable
 from sen_validator.rule_engine.__api import SENTable, RuleDefinition, RuleType
 
 
-# @dataclass(frozen=True, eq=True)
-# class RuleDefinition:
-#     """
-#     A dataclass type class used in each validation to assign information about
-#     each validation rule to the rule.
-
-#     :param str code: The rule code for each rule.
-#     :param Callable func: logic of the validation rule function.
-#     :param str message: The message to be displayed if rule is flagged.
-#     :param str affected_fields: The fields/columns affected by a validation rule.
-
-#     :returns: RuleDefinition object containing information about validation rules.
-#     :rtype: dataclass object.
-#     """
-
-#     code: str
-#     func: Callable
-#     message: Optional[str] = None
-#     affected_fields: Optional[list[str]] = None
-#     tables: Optional[list[str]] = (None,)
 
 
 def rule_definition(
@@ -35,11 +15,11 @@ def rule_definition(
     affected_fields: Optional[Iterable] = None,
 ):
     """
-    Creates the rule definition for validation rules using RuleDefinition class as a template.
+    Creates the rule definition for validation rules.
 
     :param int code: The rule code for each rule.
     :param RuleType-class rule_type: object denoting if the rule is an error or a query.
-    :param CINtable-object module: string denoting the module/table affected by a validation rule.
+    :param SENtable-object module: string denoting the module/table affected by a validation rule.
     :param str affected_fields: The fields/columns affected by a validation rule.
     :param str message: The message displayed for each validation rule.
     :returns: RuleDefinition object containing information about validation rules.

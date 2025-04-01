@@ -5,6 +5,12 @@ from typing import Callable, Iterable, Optional
 
 
 class SENTable(Enum):
+    """
+    An enumeration class (https://docs.python.org/3/library/enum.html).
+    Used in validation to select SEN data modules/tables and fields/columns
+    and assign them to variables. For practical reasons, this is done to
+    ensure consistent spelling.
+    """
     List_1 = Enum(
         "List_1",
         [
@@ -57,7 +63,7 @@ class SENTable(Enum):
 
     def __getattr__(self, item):
         """
-        Used to get attributes within the CINtable class. Practically used to define
+        Used to get attributes within the SENtable class. Practically used to define
         fields/column variables from within tables for use in validation rules.
 
         :param variable item: The name of a module and field to be used for
