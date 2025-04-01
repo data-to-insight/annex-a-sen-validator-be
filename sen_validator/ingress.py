@@ -79,6 +79,12 @@ def read_from_text(
 
 
 def read_files(files: Union[str, Path]) -> List[UploadedFile]:
+    """
+    Makes a list of file locations for uploaded files to be processed.
+
+    :param files: file to be added to uploaded_files list.
+    :returns uploaded_files: list of uploaded files to be processed.
+    """
     uploaded_files: List[_BufferedUploadedFile] = []
     for filename in files:
         uploaded_files.append(
@@ -88,31 +94,34 @@ def read_files(files: Union[str, Path]) -> List[UploadedFile]:
 
 
 def capitalise_object_dtype_cols(df) -> pd.DataFrame:
-    """This function takes in a pandas dataframe and capitalizes all the strings found in it."""
+    """
+    This function takes in a pandas dataframe and capitalizes all the strings found in it for consistency.
+    
+    :param df: input DataFrame to be capitalised.
+    :returns df: original DataFrame with all values capitalised.   
+    """
     df = df.map(lambda s: s.upper() if type(s) == str else s)
     return df
 
 
 def all_cols_to_object_dtype(df) -> pd.DataFrame:
-    """This function converts all columns to object dtype."""
+    """
+    This function converts all columns to object dtype for processing.
+
+    :param df: input DataFrame.
+    :returns df: original DataFrame with all columns as objects.  
+    """
     df = df.apply(lambda x: x.astype(object))
-    # for col in df.columns:
-    #     #if df.dtypes[col] != object:
-    #     df[col] = df[col].values.astype(object)
     return df
 
 
 def read_xlsx_from_text(raw_files: List[UploadedFile]) -> Dict[str, DataFrame]:
-    # def _get_file_type(df) -> str:
-    #     for table_name, expected_columns in column_names.items():
-    #         if set(df.columns) == set(expected_columns):
-    #             logger.info(f"Loaded {table_name} from xlsx. ({len(df)} rows)")
-    #             return table_name
-    #     else:
-    #         raise UploadError(
-    #             f"Failed to match provided data ({list(df.columns)}) to known column names!"
-    #         )
+    """
+    If the file uploaded is an xlsx instead of a csv, this function will be used to read it.
 
+    :param raw_files: input xlsx.
+    :returns dfs: dictionary of dataframes read from xlsx.
+    """
     xlsx_file = BytesIO(raw_files)
     try:
         # max_cols = max([len(cols) for cols in column_names.values()])
